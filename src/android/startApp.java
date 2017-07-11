@@ -199,8 +199,9 @@ public class startApp extends CordovaPlugin {
 				 */
 				if(params.has("intentstart") && "startActivityForResult".equals(params.getString("intentstart"))) {
 					cordova.getActivity().startActivityForResult(LaunchIntent, 1);
+					cordova.setActivityResultCallback(this);
 				}
-				if(params.has("intentstart") && "sendBroadcast".equals(params.getString("intentstart"))) {
+				else if(params.has("intentstart") && "sendBroadcast".equals(params.getString("intentstart"))) {
 					cordova.getActivity().sendBroadcast(LaunchIntent);	
 				}
 				else {
