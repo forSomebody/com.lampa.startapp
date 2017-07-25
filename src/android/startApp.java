@@ -30,6 +30,7 @@ public class startApp extends CordovaPlugin {
 
 	public static final String TAG = "startApp";
     public startApp() { }
+	private CallbackContext callbackCtx;
 	private boolean NO_PARSE_INTENT_VALS = false;
 
     /**
@@ -198,17 +199,19 @@ public class startApp extends CordovaPlugin {
 				 * launch intent
 				 */
 				if(params.has("intentstart") && "startActivityForResult".equals(params.getString("intentstart"))) {
+					callbackCtx = callback;
 					cordova.getActivity().startActivityForResult(LaunchIntent, 1);
 					cordova.setActivityResultCallback(this);
 				}
 				else if(params.has("intentstart") && "sendBroadcast".equals(params.getString("intentstart"))) {
 					cordova.getActivity().sendBroadcast(LaunchIntent);	
+					callback.success();
 				}
 				else {
-					cordova.getActivity().startActivity(LaunchIntent);	
+					cordova.getActivity().startActivity(LaunchIntent);
+					callback.success();
 				}
-				
-				callback.success();
+
 			}
 			else {
 				callback.error("Incorrect params, array is not array object!");
@@ -369,4 +372,24 @@ public class startApp extends CordovaPlugin {
 		
 		return field.getInt(null);
 	}
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    		if(null != callbackCtx){
+            		JSONObject r = new JSONObject();
+			try {
+	            		for(String key: intent.getExtras().keySet()){
+	    				String msg = intent.getStringExtra(key);
+					r.put(key, msg);
+	    			}
+	            		callbackCtx.success(r);
+			} catch (JSONException e) {
+				try {
+					r.put("exception", e.getMessage());
+				} catch (JSONException e1) {
+					e1.printStackTrace();
+				}
+				callbackCtx.error(r);
+				e.printStackTrace();
+			}		
+    		}
+    	}
 }
